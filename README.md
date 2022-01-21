@@ -31,7 +31,7 @@
 
 ## Note
 
-Secrets required are: 
+Secrets to regenerate ssl certs and that are required: 
 
 ## Docker Hub
 - .secrets/DOCKER_HUB_ID
@@ -39,6 +39,7 @@ Secrets required are:
 ## Google cloud serivce account to manage cloud dns
 - src/acme/secrets/gcloud.json
 - helm/cert-manager-resources/secrets/gke-service-accounts/gke-test-dns-key.localtest-pl.json
+
 
 ## Local development with docker-compose
 
