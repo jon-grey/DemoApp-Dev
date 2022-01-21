@@ -29,6 +29,17 @@
 
 # How to
 
+## Note
+
+Secrets required are: 
+
+## Docker Hub
+- .secrets/DOCKER_HUB_ID
+- .secrets/DOCKER_HUB_PASSWORD
+## Google cloud serivce account to manage cloud dns
+- src/acme/secrets/gcloud.json
+- helm/cert-manager-resources/secrets/gke-service-accounts/gke-test-dns-key.localtest-pl.json
+
 ## Local development with docker-compose
 
 ```sh
