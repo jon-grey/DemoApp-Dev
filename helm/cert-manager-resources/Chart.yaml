@@ -1,0 +1,5 @@
+apiVersion: v2
+description: K8S example based on https://kind.sigs.k8s.io
+name: helm-cert-manager-resources
+version: 1.0.0
+appVersion: 1.0.0

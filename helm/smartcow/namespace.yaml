@@ -1,0 +1,13 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  annotations:
+    meta.helm.sh/release-name: helm-smartcow
+    meta.helm.sh/release-namespace: smartcow
+  labels:
+    app.kubernetes.io/managed-by: Helm
+    kubed-sync-label: "kind-localtest-ca-letsencrypt"
+    name: smartcow
+    app: kubed
+  name: smartcow

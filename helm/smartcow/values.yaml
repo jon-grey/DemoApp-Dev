@@ -1,0 +1,193 @@
+
+
+###################################################################################################
+#### NAMESPACE CONF ...
+###################################################################################################
+
+# Resource Quotas
+# [Resource Quotas](https://kubernetes.io/docs/concepts/policy/resource-quotas/)
+
+# When several users or teams share a cluster with a fixed number of nodes, there is a concern that one team could use more than its fair share of resources.
+
+# Resource quotas are a tool for administrators to address this concern.
+
+# A resource quota, defined by a ResourceQuota object, provides constraints that limit aggregate resource consumption per namespace. It can limit the quantity of objects that can be created in a namespace by type, as well as the total amount of compute resources that may be consumed by resources in that namespace.
+
+# Resource quotas work like this:
+# - Different teams work in different namespaces. Currently this is voluntary, but support for making this mandatory via ACLs is planned.
+# - The administrator creates one ResourceQuota for each namespace.
+# - Users create resources (pods, services, etc.) in the namespace, and the quota system tracks usage to ensure it does not exceed hard resource limits defined in a ResourceQuota.
+# - If creating or updating a resource violates a quota constraint, the request will fail with HTTP status code 403 FORBIDDEN with a message explaining the constraint that would have been violated.
+# - If quota is enabled in a namespace for compute resources like cpu and memory, users must specify requests or limits for those values; otherwise, the quota system may reject pod creation. Hint: Use the LimitRanger admission controller to force defaults for pods that make no compute resource requirements. See the [walkthrough](https://kubernetes.io/docs/tasks/administer-cluster/manage-resources/quota-memory-cpu-namespace/) for an example of how to avoid this problem.
+
+# Examples of policies that could be created using namespaces and quotas are:
+
+# - In a cluster with a capacity of 32 GiB RAM, and 16 cores, let team A use 20 GiB and 10 cores, let B use 10GiB and 4 cores, and hold 2GiB and 2 cores in reserve for future allocation.
+# - Limit the "testing" namespace to using 1 core and 1GiB RAM. Let the "production" namespace use any amount.
+# - In the case where the total capacity of the cluster is less than the sum of the quotas of the namespaces, there may be contention for resources. This is handled on a first-come-first-served basis.
+
+# Neither contention nor changes to quota will affect already created resources.
+resourceQuota: {}
+
+# resourceQuota:
+#   hard:
+#     requests.cpu: 3000m
+#     requests.memory: 6Gi
+#     limits.cpu: 12000m
+#     limits.memory: 12Gi
+
+## Limit Ranges
+## [Configure Default Memory Requests and Limits for a Namespace](https://kubernetes.io/docs/tasks/administer-cluster/manage-resources/memory-default-namespace/)
+## By default, containers run with unbounded compute resources on a Kubernetes cluster. With resource quotas, cluster administrators can restrict resource consumption and creation on a namespace basis. Within a namespace, a Pod or Container can consume as much CPU and memory as defined by the namespace's resource quota. There is a concern that one Pod or Container could monopolize all available resources. A LimitRange is a policy to constrain resource allocations (to Pods or Containers) in a namespace.
+
+## A LimitRange provides constraints that can:
+## - Enforce minimum and maximum compute resources usage per Pod or Container in a namespace.
+## - Enforce minimum and maximum storage request per PersistentVolumeClaim in a namespace.
+## - Enforce a ratio between request and limit for a resource in a namespace.
+## - Set default request/limit for compute resources in a namespace and automatically inject them to Containers at runtime.
+limitRange: {}
+
+# limitRange:
+#   limits:
+#   - default:
+#       memory: 50Mi
+#       cpu: 50m
+#     defaultRequest:
+#       memory: 50Mi
+#       cpu: 50m
+#     max:
+#       memory: 1000Mi
+#       cpu: 1000m
+#     min:
+#       memory: 50Mi
+#       cpu: 50m
+#     type: Container
+
+###################################################################################################
+#### APPS...
+###################################################################################################
+
+apps:
+
+  ###################################################################################################
+  #### APP: api
+  ###################################################################################################
+  api:
+    enabled: true
+
+    image:
+      repository: robgrzel/api-k8s
+      pullPolicy: Always
+      imagePullSecrets: docker-hub-secret
+      # Overrides the image tag whose default is the chart appVersion.
+      tag: "dev2"
+
+    ingress:
+      enabled: true
+      replicaCount: 1
+      annotations:
+        kubernetes.io/tls-acme: "true"
+        kubernetes.io/ingress.class: nginx
+        nginx.ingress.kubernetes.io/use-regex: "true"
+        nginx.ingress.kubernetes.io/rewrite-target: /
+      hosts:
+      - host: api.gke-test.localtest.pl
+        paths:
+          - path: /
+            backend:
+              service:
+                name: api
+                port: 
+                  number: 5000
+      tls:
+      - secretName: gke-letsencrypt-cert
+        hosts:
+          - api.gke-test.localtest.pl
+
+    containerPort: 5000
+
+    podType: backend
+
+    service:
+      type: ClusterIP
+      port: 5000
+      targetPort: 5000
+      ## only uncomment if service type is NodePort
+      # nodePort: 80
+
+    serviceAccount:
+      # Specifies whether a service account should be created
+      create: false
+
+    # DISABLED when autoscaling enabled
+    replicaCount: 1
+    autoscaling:
+      enabled: false
+
+    test: true
+
+  ###################################################################################################
+  #### APP: landing-pages-frontend
+  ###################################################################################################
+  frontend:
+    enabled: true
+
+    image:
+      repository: robgrzel/frontend-k8s
+      pullPolicy: Always
+      imagePullSecrets: docker-hub-secret
+      # Overrides the image tag whose default is the chart appVersion.
+      tag: "dev2"
+
+    ingress:
+      enabled: true
+      replicaCount: 1
+      annotations:
+        kubernetes.io/tls-acme: "true"
+        kubernetes.io/ingress.class: nginx
+        nginx.ingress.kubernetes.io/use-regex: "true"
+        nginx.ingress.kubernetes.io/rewrite-target: /
+      hosts:
+      - host: frontend.gke-test.localtest.pl
+        paths:
+          - path: /
+            backend:
+              service:
+                name: frontend
+                port: 
+                  number: 80
+      tls: 
+      - secretName: gke-letsencrypt-cert
+        hosts:
+          - frontend.gke-test.localtest.pl
+
+    ## These config will be added as environment variables
+    config:
+      data:
+        - key: REACT_APP_API_HOST
+          value: https://api.gke-test.localtest.pl
+        - key: REACT_APP_API_PORT
+          value: 443
+
+    containerPort: 80
+
+    podType: frontend
+
+    service:
+      type: ClusterIP
+      port: 80
+      targetPort: 80
+      ## only uncomment if service type is NodePort
+      # nodePort: 80
+
+    serviceAccount:
+      # Specifies whether a service account should be created
+      create: false
+
+    # DISABLED when autoscaling enabled
+    replicaCount: 1
+    autoscaling:
+      enabled: false
+
+    test: true
+

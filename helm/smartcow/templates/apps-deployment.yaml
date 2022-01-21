@@ -1,0 +1,115 @@
+{{- range $k, $v := .Values.apps }}
+{{- if and $v.enabled  $v.image }}
+{{- if not $v.statefulSet -}}
+{{- $v := set $v "Chart" $.Chart }}
+{{- $v := set $v "Release" $.Release }}
+{{- $v := set $v "nameOverride" $k }}
+
+---
+# DEPLOYMENT: {{ $k }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "app.fullname" . }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- include "app.labels" . | nindent 4 }}
+    {{- with $v.extraLabels }}
+      {{ toYaml . | indent 4 }}
+    {{- end }}
+  {{- if $v.annotations }}
+  annotations:
+  {{- toYaml $v.annotations | indent 4 }}
+  {{- end }}
+spec:
+{{- if and $v.replicaCount (not $v.autoscaling.enabled) }}
+  replicas: {{ $v.replicaCount }}
+{{- end }}
+  selector:
+    matchLabels:
+      {{- include "app.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with $v.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "app.selectorLabels" . | nindent 8 }}
+        {{- with $v.podLabels }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- if $v.image.imagePullSecrets }}
+      imagePullSecrets:
+        - name: {{ $v.image.imagePullSecrets }}
+      {{- end }}
+      serviceAccountName: {{ include "app.serviceAccountName" . }}
+      {{- if $v.podSecurityContext }}
+      securityContext:
+        {{- toYaml $v.podSecurityContext | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ include "app.name" . }}
+          {{- if $v.podSecurityContext }}
+          securityContext:
+            {{- toYaml $v.securityContext | nindent 12 }}
+          {{- end }}
+          {{ $defaultImageName := printf "%s:%s" $v.image.repository $v.image.tag -}}
+          image: "{{ $v.image.name | default $defaultImageName }}"
+          imagePullPolicy: {{ $v.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ $v.containerPort }}
+              protocol: TCP
+          {{- if $v.resources }}
+          resources:
+            {{- toYaml $v.resources | nindent 12 }}
+          {{- end }}
+          {{- if or $v.confg $v.secrets }}
+          envFrom:
+          {{- if $v.config }}
+          - configMapRef:
+              name: {{ include "app.fullname" . }}-configmap
+          {{- end }}
+          {{- if $v.secrets }}
+          - secretRef:
+              name: {{ include "app.fullname" . }}-secrets
+          {{- end }}
+          {{- end }}
+          volumeMounts:
+          {{- if $v.config }}
+          - name: config-volume
+            mountPath: /etc/config
+          {{- end }}
+          {{- range $volumeMap := $v.volumes }}
+          - name: {{ $volumeMap.name }}
+            mountPath: {{ $volumeMap.mountPath }}
+            subPath: {{ $volumeMap.subPath }}
+          {{- end }}
+      {{- if $v.config }}
+      volumes:
+      - name: config-volume
+        configMap:
+          name: {{ include "app.fullname" . }}-configmap
+      {{- range $volumeMap := $v.volumes }}
+      - name: {{ $volumeMap.name }}
+        persistentVolumeClaim:
+          claimName: {{ $volumeMap.pvc.name }}
+      {{- end }}
+      {{- end }}
+      {{- with $v.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $v.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $v.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

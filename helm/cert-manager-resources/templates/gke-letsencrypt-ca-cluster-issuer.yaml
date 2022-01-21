@@ -1,0 +1,46 @@
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: gke-letsencrypt-stag
+  annotations:
+    kubed.appscode.com/sync: "kubed-sync-label=kind-localtest-ca-letsencrypt"
+spec:
+  acme:
+    email: acznowy@acznowy.pl
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: gke-letsencrypt-stag-secret
+    solvers:
+    - dns01:
+        cnameStrategy: Follow
+        cloudDNS:
+          # The ID of the GCP project
+          project: master-diorama-326019
+          # This is the secret used to access the service account
+          serviceAccountSecretRef:
+            name: gke-service-account-key
+            key: gke-test-dns-key.localtest-pl.json
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: gke-letsencrypt
+  annotations:
+    kubed.appscode.com/sync: "kubed-sync-label=kind-localtest-ca-letsencrypt"
+spec:
+  acme:
+    email: acznowy@acznowy.pl
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: gke-letsencrypt-secret
+    solvers:
+    - dns01:
+        cnameStrategy: Follow
+        cloudDNS:
+          # The ID of the GCP project
+          project: master-diorama-326019
+          # This is the secret used to access the service account
+          serviceAccountSecretRef:
+            name: gke-service-account-key
+            key: gke-test-dns-key.localtest-pl.json

@@ -1,0 +1,10 @@
+apiVersion: v2
+description: Helm chart for kubed
+name: helm-kubed
+namespace: kube-system
+version:  v0.12.0
+appVersion: v0.12.0
+dependencies:
+  - name: kubed
+    version: v0.12.0
+    repository: https://charts.appscode.com/stable/

@@ -1,0 +1,40 @@
+{{- range $k, $v := .Values.apps }}
+{{- if and $v.enabled $v.service }}
+{{- $v := set $v "Chart" $.Chart }}
+{{- $v := set $v "Release" $.Release }}
+{{- $v := set $v "nameOverride" $k }}
+
+---
+# SERVICE: {{ $k }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "app.fullname" . }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- include "app.labels" . | nindent 4 }}
+    {{- with $v.extraLabels }}
+      {{ toYaml . | indent 4 }}
+    {{- end }}
+{{- if $v.annotations }}
+  annotations: {{ toYaml $v.annotations | indent 4 }}
+{{- end }}
+spec:
+  type: {{ $v.service.type }}
+  ports:
+    - port: {{ $v.service.port }}
+      targetPort: {{ $v.service.targetPort }}
+      protocol: {{ $v.service.protocol | default "TCP" }}
+      name: {{ $v.service.name | default "http" }}
+      {{- if and (eq $v.service.type "NodePort") $v.service.nodePort }}
+      nodePort: {{ $v.service.nodePort }}
+      {{- else if and (eq $v.service.type "LoadBalancer") $v.service.loadBalancerIP }}
+      loadBalancerIP: {{ $v.service.loadBalancerIP }}
+      {{- end }}
+  selector:
+    {{- include "app.selectorLabels" $v | nindent 4 }}
+  {{- if $v.service.sessionAffinity }}
+  sessionAffinity: {{ $v.service.sessionAffinity }}
+  {{- end }}
+{{- end }}
+{{- end }}

@@ -1,0 +1,23 @@
+{{- range $k, $v := .Values.apps }}
+{{- if and $v.enabled $v.volumes }}
+{{- $v := set $v "Chart" $.Chart }}
+{{- $v := set $v "Release" $.Release }}
+{{- $v := set $v "nameOverride" $k }}
+
+{{- range $volumeMap := $v.volumes }}
+---
+# PVC: {{ $k }}
+apiVersion: v1
+kind: {{ $volumeMap.kind }}
+metadata:
+  name: {{ $volumeMap.pvc.name }}
+  namespace: {{ $.Release.Namespace }}
+spec:
+  accessModes:
+    - {{ $volumeMap.pvc.accessMode }}
+  resources:
+    requests:
+      storage: {{ $volumeMap.pvc.storage }}
+{{- end }}
+{{- end }}
+{{- end }}

@@ -1,0 +1,32 @@
+{{- range $k, $v := .Values.apps }}
+{{- if and $v.enabled  $v.config }}
+{{- $v := set $v "Chart" $.Chart }}
+{{- $v := set $v "Release" $.Release }}
+{{- $v := set $v "nameOverride" $k }}
+
+---
+# CONFIGMAP: {{ $k }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "app.fullname" . }}-configmap
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- include "app.labels" . | nindent 4 }}
+    {{- with $v.extraLabels }}
+      {{ toYaml . | indent 4 }}
+    {{- end }}
+{{- if $v.annotations }}
+  annotations: {{ toYaml $v.annotations | indent 4 }}
+{{- end }}
+data:
+{{- range $v.config.data }}
+  {{ .key }}: {{ .value | quote }}
+{{- end }}
+{{- range $name := $v.config.files }}
+{{- $path := printf "config/%s" $name }}
+{{ $name | indent 2 }}: |-
+{{ $.Files.Get $path  | indent 4   }}
+{{- end }}
+{{- end }}
+{{- end }}

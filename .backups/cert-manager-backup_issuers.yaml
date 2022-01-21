@@ -1,0 +1,117 @@
+apiVersion: v1
+items:
+- apiVersion: cert-manager.io/v1
+  kind: ClusterIssuer
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"cert-manager.io/v1","kind":"ClusterIssuer","metadata":{"annotations":{"kubed.appscode.com/sync":"kubed-sync-label=kind-localtest-ca-letsencrypt","meta.helm.sh/release-name":"helm-cert-manager-resources","meta.helm.sh/release-namespace":"cert-manager"},"creationTimestamp":"2021-10-09T13:46:02Z","generation":1,"labels":{"app.kubernetes.io/managed-by":"Helm"},"name":"gke-letsencrypt","resourceVersion":"22018","uid":"728bd7ed-7dd6-4995-993c-e2b00e142ff1"},"spec":{"acme":{"email":"acznowy@acznowy.pl","preferredChain":"","privateKeySecretRef":{"name":"gke-letsencrypt-secret"},"server":"https://acme-v02.api.letsencrypt.org/directory","solvers":[{"dns01":{"cloudDNS":{"project":"master-diorama-326019","serviceAccountSecretRef":{"key":"gke-test-dns-key.localtest-pl.json","name":"gke-service-account-key"}},"cnameStrategy":"Follow"}}]}},"status":{"acme":{"lastRegisteredEmail":"acznowy@acznowy.pl","uri":"https://acme-v02.api.letsencrypt.org/acme/acct/232564830"},"conditions":[{"lastTransitionTime":"2021-10-09T13:46:03Z","message":"The ACME account was registered with the ACME server","observedGeneration":1,"reason":"ACMEAccountRegistered","status":"True","type":"Ready"}]}}
+      kubed.appscode.com/sync: kubed-sync-label=kind-localtest-ca-letsencrypt
+      meta.helm.sh/release-name: helm-cert-manager-resources
+      meta.helm.sh/release-namespace: cert-manager
+    creationTimestamp: "2021-10-10T17:38:24Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/managed-by: Helm
+    name: gke-letsencrypt
+    resourceVersion: "38768"
+    uid: 5acd5944-54db-4538-9065-7eb92dd19b17
+  spec:
+    acme:
+      email: acznowy@acznowy.pl
+      preferredChain: ""
+      privateKeySecretRef:
+        name: gke-letsencrypt-secret
+      server: https://acme-v02.api.letsencrypt.org/directory
+      solvers:
+      - dns01:
+          cloudDNS:
+            project: master-diorama-326019
+            serviceAccountSecretRef:
+              key: gke-test-dns-key.localtest-pl.json
+              name: gke-service-account-key
+          cnameStrategy: Follow
+  status:
+    acme:
+      lastRegisteredEmail: acznowy@acznowy.pl
+      uri: https://acme-v02.api.letsencrypt.org/acme/acct/233915590
+    conditions:
+    - lastTransitionTime: "2021-10-10T17:38:26Z"
+      message: The ACME account was registered with the ACME server
+      observedGeneration: 1
+      reason: ACMEAccountRegistered
+      status: "True"
+      type: Ready
+
+- apiVersion: cert-manager.io/v1
+  kind: ClusterIssuer
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"cert-manager.io/v1","kind":"ClusterIssuer","metadata":{"annotations":{"kubed.appscode.com/sync":"kubed-sync-label=kind-localtest-ca-letsencrypt","meta.helm.sh/release-name":"helm-cert-manager-resources","meta.helm.sh/release-namespace":"cert-manager"},"creationTimestamp":"2021-10-09T13:46:02Z","generation":1,"labels":{"app.kubernetes.io/managed-by":"Helm"},"name":"gke-letsencrypt-stag","resourceVersion":"22013","uid":"1266111e-2364-42ca-8bc4-d267b96f9f33"},"spec":{"acme":{"email":"acznowy@acznowy.pl","preferredChain":"","privateKeySecretRef":{"name":"gke-letsencrypt-stag-secret"},"server":"https://acme-staging-v02.api.letsencrypt.org/directory","solvers":[{"dns01":{"cloudDNS":{"project":"master-diorama-326019","serviceAccountSecretRef":{"key":"gke-test-dns-key.localtest-pl.json","name":"gke-service-account-key"}},"cnameStrategy":"Follow"}}]}},"status":{"acme":{"lastRegisteredEmail":"acznowy@acznowy.pl","uri":"https://acme-staging-v02.api.letsencrypt.org/acme/acct/29459908"},"conditions":[{"lastTransitionTime":"2021-10-09T13:46:03Z","message":"The ACME account was registered with the ACME server","observedGeneration":1,"reason":"ACMEAccountRegistered","status":"True","type":"Ready"}]}}
+      kubed.appscode.com/sync: kubed-sync-label=kind-localtest-ca-letsencrypt
+      meta.helm.sh/release-name: helm-cert-manager-resources
+      meta.helm.sh/release-namespace: cert-manager
+    creationTimestamp: "2021-10-10T17:38:24Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/managed-by: Helm
+    name: gke-letsencrypt-stag
+    resourceVersion: "38795"
+    uid: e5129e9e-b55d-4a06-8de7-d2519be5eb91
+  spec:
+    acme:
+      email: acznowy@acznowy.pl
+      preferredChain: ""
+      privateKeySecretRef:
+        name: gke-letsencrypt-stag-secret
+      server: https://acme-staging-v02.api.letsencrypt.org/directory
+      solvers:
+      - dns01:
+          cloudDNS:
+            project: master-diorama-326019
+            serviceAccountSecretRef:
+              key: gke-test-dns-key.localtest-pl.json
+              name: gke-service-account-key
+          cnameStrategy: Follow
+  status:
+    acme:
+      lastRegisteredEmail: acznowy@acznowy.pl
+      uri: https://acme-staging-v02.api.letsencrypt.org/acme/acct/29559318
+    conditions:
+    - lastTransitionTime: "2021-10-10T17:38:27Z"
+      message: The ACME account was registered with the ACME server
+      observedGeneration: 1
+      reason: ACMEAccountRegistered
+      status: "True"
+      type: Ready
+- apiVersion: cert-manager.io/v1
+  kind: ClusterIssuer
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"cert-manager.io/v1","kind":"ClusterIssuer","metadata":{"annotations":{"meta.helm.sh/release-name":"helm-cert-manager-resources","meta.helm.sh/release-namespace":"cert-manager"},"creationTimestamp":"2021-10-09T13:46:02Z","generation":1,"labels":{"app.kubernetes.io/managed-by":"Helm"},"name":"selfsigned-ca","resourceVersion":"63043","uid":"30ffc7fa-996e-4117-bb20-bf08d7f933c4"},"spec":{"ca":{"secretName":"selfsigned-ca"}},"status":{"conditions":[{"lastTransitionTime":"2021-10-10T10:43:48Z","message":"Signing CA verified","observedGeneration":1,"reason":"KeyPairVerified","status":"True","type":"Ready"}]}}
+      meta.helm.sh/release-name: helm-cert-manager-resources
+      meta.helm.sh/release-namespace: cert-manager
+    creationTimestamp: "2021-10-10T17:38:24Z"
+    generation: 1
+    labels:
+      app.kubernetes.io/managed-by: Helm
+    name: selfsigned-ca
+    resourceVersion: "38829"
+    uid: f6ee5a7a-5d4e-493b-a34d-3b7b5dfb8ec2
+  spec:
+    ca:
+      secretName: selfsigned-ca
+  status:
+    conditions:
+    - lastTransitionTime: "2021-10-10T17:38:29Z"
+      message: Signing CA verified
+      observedGeneration: 1
+      reason: KeyPairVerified
+      status: "True"
+      type: Ready
+kind: List
+metadata:
+  resourceVersion: ""
+  selfLink: ""

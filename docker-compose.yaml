@@ -1,0 +1,94 @@
+version: '3'
+services:
+  acme:
+    image: robgrzel/acme:dev
+    build:
+      context: ./src/acme
+      dockerfile: Dockerfile
+      args:
+        - CERT_NAME=gke-test.localtest.pl
+    container_name: acme
+    restart: always
+    environment:
+      - LETSENCRYPT_SERVER=prod
+      - EMAIL=robert.grzelka@ralf-it.com
+      - DOMAIN=*.gke-test.localtest.pl
+      - CERT_NAME=gke-test.localtest.pl
+      - KEY_FILE=gcloud.json
+    volumes:
+      - .certs:/root/certs:rw
+      - /root/.acme.sh/*.gke-test.localtest.pl
+  proxy:
+    image: robgrzel/proxy:dev
+    build:
+      context: ./src/proxy
+      dockerfile: Dockerfile
+      args:
+        - HOST_TYPE=aws
+        - CERT_NAME=gke-test.localtest.pl
+    container_name: proxy
+    restart: always
+    environment:
+      - DEFAULT_HOST=gke-test.localtest.pl
+      - CERT_NAME=gke-test.localtest.pl
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - /etc/nginx/vhost.d
+      - /usr/share/nginx/html
+      - .certs/prod:/etc/nginx/certs:ro
+    networks:
+      - proxy
+      - internal
+    depends_on:
+      - acme
+
+  frontend:
+    image: robgrzel/frontend:dev
+    build:
+      context: ./src/sys-stats
+      dockerfile: Dockerfile
+      args:
+        - REACT_APP_API_HOST=https://api.gke-test.localtest.pl
+        - REACT_APP_API_PORT=443
+    env_file:
+      - ./src/sys-stats/.env
+    container_name: frontend
+    restart: always
+    volumes:
+      - /home/python/.local
+    environment:
+      - VIRTUAL_HOST=frontend.gke-test.localtest.pl
+    networks:
+      - internal
+  api:
+    image: robgrzel/api:dev
+    build:
+      context: ./src/api
+      dockerfile: Dockerfile
+    env_file:
+    - ./src/api/.env
+    container_name: api
+    restart: always
+    expose:
+      - 5000
+    volumes:
+      - ./src/sys-stats/public:/app/public
+      - ./src/sys-stats/build:/app/build
+      - /app/node_modules
+    environment:
+      - VIRTUAL_HOST=api.gke-test.localtest.pl
+      # Fixes 502 bad gateway
+      - VIRTUAL_PORT=5000
+    networks:
+      - internal
+networks:
+  proxy:
+    internal: false
+  internal:
+    internal: true
+volumes:
+  vol1:
+

@@ -1,0 +1,26 @@
+{{- range $k, $v := .Values.apps }}
+{{- if and $v.enabled  $v.test }}
+{{- $v := set $v "Chart" $.Chart }}
+{{- $v := set $v "Release" $.Release }}
+{{- if not $v.fullnameOverride }}
+{{- $v := set $v "fullnameOverride" $k }}
+{{- end }}
+---
+# TEST/TEST-CONNECTION: {{ $k }}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ include "app.fullname" . }}-test-connection
+  labels:
+    {{- include "app.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test-success
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "app.fullname" . }}:{{ $v.service.port }}']
+  restartPolicy: Never
+{{- end }}
+{{- end }}

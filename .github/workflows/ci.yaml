@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - 'master'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Save secrets
+      env: 
+        GCLOUD_JSON: ${{ secrets.GCLOUD_JSON }}
+        DOCKER_HUB_ID: ${{ secrets.DOCKER_HUB_ID }}
+        DOCKER_HUB_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}
+      run: |
+        mkdir -p src/acme/secrets
+        mkdir -p .secrets/secrets
+        echo ${GCLOUD_JSON} > src/acme/secrets/gcloud.json
+        echo ${DOCKER_HUB_ID} > .secrets/DOCKER_HUB_ID
+        echo ${DOCKER_HUB_PASSWORD} > .secrets/DOCKER_HUB_PASSWORD
+    - name: Build docker-compose
+      run: make dc-build
+    - name: Run docker-compose
+      run: make dc-up-d
+    - name: Tests
+      run: make tests
+    - name: Push docker-compose
+      run: |
+        make dlogin
+        make dc-push-k8s

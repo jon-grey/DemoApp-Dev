@@ -1,0 +1,63 @@
+{{- range $k, $v := .Values.apps }}
+{{- if and $v.enabled  $v.ingress }}
+{{- if $v.ingress.enabled -}}
+{{- $v := set $v "Chart" $.Chart }}
+{{- $v := set $v "Release" $.Release }}
+{{- $v := set $v "Capabilities" $.Capabilities }}
+{{- $v := set $v "nameOverride" $k }}
+
+---
+{{- $apiIsStable := eq (include "ingress.isStable" .) "true" -}}
+{{- $pathType := $v.ingress.pathType | default "ImplementationSpecific" -}}
+{{- $ingressSupportsPathType := eq (include "ingress.supportsPathType" .) "true" -}}
+# INGRESS: {{ $k }}
+apiVersion: {{ include "ingress.apiVersion" . }}
+kind: Ingress
+metadata:
+  name:  {{ include "app.fullname" . }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- include "app.labels" . | nindent 4 }}
+    {{- with $v.extraLabels }}
+      {{ toYaml . | indent 4 }}
+    {{- end }}
+    {{- if $v.ingress.labels }}
+    {{- toYaml $v.ingress.labels | indent 4 }}
+    {{- end }}
+  annotations:
+  {{- if $v.annotations }}
+  {{- toYaml $v.annotations | indent 4 }}
+  {{- end }}
+  {{- with $v.ingress.annotations }}
+  {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if $v.ingress.tls }}
+  tls:
+{{ tpl (toYaml $v.ingress.tls | indent 2 ) $ }}
+  {{- end }}
+  rules:
+  {{- range $hostMap := $v.ingress.hosts }}
+  - host: {{ tpl $hostMap.host $ }}
+    http:
+      paths:
+      {{- range $pathMap := $hostMap.paths }}
+      - path: {{ $pathMap.path }}
+        {{- if and $pathType $ingressSupportsPathType }}
+        pathType: {{ $pathType }}
+        {{- end }}
+        backend:
+          {{- if $apiIsStable }}
+          service:
+            name: {{ $pathMap.backend.service.name }}
+            port:
+              number: {{ $pathMap.backend.service.port.number }}
+          {{- else }}
+          serviceName: {{ $pathMap.backend.service.name }}
+          servicePort: {{ $pathMap.backend.service.port }}
+          {{- end }}
+      {{- end }}
+  {{- end -}}
+{{- end }}
+{{- end }}
+{{- end }}

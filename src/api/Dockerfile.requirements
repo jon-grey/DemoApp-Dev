@@ -1,0 +1,25 @@
+
+###############################################################################
+#### PYTHON REQUIREMENTS BUILDER
+###############################################################################
+
+FROM python:3.9.10-slim-buster 
+
+
+RUN useradd -m python
+
+USER python
+
+RUN pip3 install --no-cache-dir  \
+        python-dotenv \
+        psutil \
+        flask-cors \
+        gunicorn \
+        Flask
+
+RUN pip3 freeze > /tmp/requirements.txt
+RUN mkdir -p      /tmp/requirements
+
+USER root
+
+ENTRYPOINT [ "cp", "/tmp/requirements.txt" ,"/tmp/requirements/requirements.txt" ]

@@ -1,0 +1,13 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  annotations:
+    meta.helm.sh/release-name: helm-cert-manager
+    meta.helm.sh/release-namespace: cert-manager
+  labels:
+    app.kubernetes.io/managed-by: Helm
+    kubed-sync-label: "kind-localtest-ca-letsencrypt"
+    name: cert-manager
+    app: kubed
+  name: cert-manager
