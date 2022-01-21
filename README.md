@@ -18,11 +18,11 @@
 - [ ] - Add auto update of version of images on push to dockerhub
 # Result
 
-![](IMAGES/2022-01-21-05-51-33.png)
+![](.img/2022-01-21-05-51-33.png)
 
-![](IMAGES/2022-01-21-05-51-48.png)
+![](.img/2022-01-21-05-51-48.png)
 
-![](IMAGES/2022-01-21-05-53-19.png)
+![](.img/2022-01-21-05-53-19.png)
 
 # How to
 
