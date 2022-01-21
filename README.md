@@ -1,6 +1,7 @@
 
 # Todo
 
+## Task 1
 - [x] - Contenerize app
 - [x] - Automate requirements.txt generation:
   - [x] - script on host
@@ -10,7 +11,9 @@
   - [x] - Google cloud dns for cert challenge
   - [x] - amce.sh to generate certs
 - [x] - GitHub actions for CI (build, test) and push images to Docker Hub
-- [x] - Deploy to AWS 
+## Task 2
+- [ ] - Deploy to AWS 
+## Task 3
 - [x] - Deploy kubernetes with kind cluster
 - [x] - Deploy kubernetes with minikube (for ingress to work require to write `<IP address> <host>` to /etc/hosts)
 - [x] - Enable https with letsencrypt certs in kuberntes: kubed, cert-manager, nginx-ingress
