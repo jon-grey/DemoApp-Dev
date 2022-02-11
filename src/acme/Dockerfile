@@ -19,15 +19,17 @@ ARG LETSENCRYPT_SERVER="stag"
 ARG DOMAIN="*.gke-test.localtest.pl"
 ENV CA_CERT_DIR "${CA_DIR}/${DOMAIN}"
 ENV CA_CERT_PATH "${CA_CERT_DIR}/ca.cer"
+ENV FULLCHAIN_PATH "${CA_CERT_DIR}/fullchain.cer"
 
 # copy service account secret
 COPY secrets/${KEY_FILE} ${KEY_PATH}
 
 WORKDIR ${SCRIPTS_DIR}
 COPY scripts/gencert.sh gencert.sh
+COPY scripts/main.sh main.sh
 
 
 ENTRYPOINT [ "bash" ]
-CMD [ "gencert.sh" ]
+CMD [ "main.sh" ]
 
 

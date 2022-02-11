@@ -2,12 +2,12 @@ version: '3'
 services:
 
   frontend:
-    image: robgrzel/frontend-k8s:dev2
+    image: robgrzel/frontend-k8s:$TAG
     build:
       context: ./src/sys-stats
       dockerfile: Dockerfile
       args:
-        - REACT_APP_API_HOST=https://api.gke-test.localtest.pl
+        - REACT_APP_API_HOST=$REACT_APP_API_HOST
         - REACT_APP_API_PORT=443
     env_file:
       - ./src/sys-stats/.env
@@ -16,7 +16,7 @@ services:
     volumes:
       - /home/python/.local
   api:
-    image: robgrzel/api-k8s:dev2
+    image: robgrzel/api-k8s:$TAG
     build:
       context: ./src/api
       dockerfile: Dockerfile

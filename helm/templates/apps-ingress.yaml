@@ -24,13 +24,13 @@ metadata:
     {{- if $v.ingress.labels }}
     {{- toYaml $v.ingress.labels | indent 4 }}
     {{- end }}
-  annotations:
-  {{- if $v.annotations }}
-  {{- toYaml $v.annotations | indent 4 }}
-  {{- end }}
-  {{- with $v.ingress.annotations }}
-  {{- toYaml . | nindent 4 }}
-  {{- end }}
+  annotations: 
+{{- if $v.annotations }}
+{{ toYaml $v.annotations | indent 4 }}
+{{- end }}
+{{- if $v.ingress.annotations }}
+{{ toYaml $v.ingress.annotations | indent 4 }}
+{{- end }}
 spec:
   {{- if $v.ingress.tls }}
   tls:

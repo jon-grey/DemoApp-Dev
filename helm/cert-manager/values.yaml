@@ -1,6 +1,0 @@
-cert-manager:
-  installCRDs: true
-  podDnsPolicy: "None"
-  podDnsConfig:
-    nameservers:
-      - "8.8.8.8"

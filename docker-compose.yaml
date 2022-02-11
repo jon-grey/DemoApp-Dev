@@ -6,31 +6,32 @@ services:
       context: ./src/acme
       dockerfile: Dockerfile
       args:
-        - CERT_NAME=gke-test.localtest.pl
+        - CERT_NAME=$DOMAIN
     container_name: acme
     restart: always
     environment:
       - LETSENCRYPT_SERVER=prod
       - EMAIL=robert.grzelka@ralf-it.com
-      - DOMAIN=*.gke-test.localtest.pl
-      - CERT_NAME=gke-test.localtest.pl
-      - KEY_FILE=gcloud.json
+      - DOMAIN=*.$DOMAIN
+      - CERT_NAME=$DOMAIN
+      - KEY_FILE=gcloud.jso
     volumes:
       - .certs:/root/certs:rw
-      - /root/.acme.sh/*.gke-test.localtest.pl
+      - /root/.acme.sh/*.$DOMAIN
   proxy:
     image: robgrzel/proxy:dev
     build:
       context: ./src/proxy
       dockerfile: Dockerfile
       args:
-        - HOST_TYPE=aws
-        - CERT_NAME=gke-test.localtest.pl
+        - HOST_TYPE=localhost
+        - CERT_NAME=$DOMAIN
+        - DEFAULT_HOST=$REACT_APP_HOST
     container_name: proxy
     restart: always
     environment:
-      - DEFAULT_HOST=gke-test.localtest.pl
-      - CERT_NAME=gke-test.localtest.pl
+      - CERT_NAME=$DOMAIN
+      - DEFAULT_HOST=$REACT_APP_HOST
     ports:
       - '80:80'
       - '443:443'
@@ -51,7 +52,7 @@ services:
       context: ./src/sys-stats
       dockerfile: Dockerfile
       args:
-        - REACT_APP_API_HOST=https://api.gke-test.localtest.pl
+        - REACT_APP_API_HOST=$REACT_APP_API_HOST
         - REACT_APP_API_PORT=443
     env_file:
       - ./src/sys-stats/.env
@@ -60,7 +61,7 @@ services:
     volumes:
       - /home/python/.local
     environment:
-      - VIRTUAL_HOST=frontend.gke-test.localtest.pl
+      - VIRTUAL_HOST=$REACT_APP_HOST
     networks:
       - internal
   api:
@@ -72,16 +73,18 @@ services:
     - ./src/api/.env
     container_name: api
     restart: always
-    expose:
-      - 5000
     volumes:
       - ./src/sys-stats/public:/app/public
       - ./src/sys-stats/build:/app/build
       - /app/node_modules
     environment:
-      - VIRTUAL_HOST=api.gke-test.localtest.pl
+      - VIRTUAL_HOST=$REACT_APP_API_HOST
       # Fixes 502 bad gateway
       - VIRTUAL_PORT=5000
+      - K8S_NODE_NAME=Docker-Compose
+      - K8S_POD_NAME=?
+      - K8s_POD_NAMESPACE=?
+
     networks:
       - internal
 networks:

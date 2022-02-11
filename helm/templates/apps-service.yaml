@@ -16,8 +16,9 @@ metadata:
     {{- with $v.extraLabels }}
       {{ toYaml . | indent 4 }}
     {{- end }}
+  annotations: 
 {{- if $v.annotations }}
-  annotations: {{ toYaml $v.annotations | indent 4 }}
+{{ toYaml $v.annotations | indent 4 }}
 {{- end }}
 spec:
   type: {{ $v.service.type }}

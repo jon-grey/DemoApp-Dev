@@ -56,7 +56,7 @@ apps:
     # Declare variables to be passed into your templates.
 
     image:
-      repository:  harbor.odc-infrak8s.concentrix.com/maz/nginx
+      repository:  harbor.odc-infrak8s.ralf-it.com/maz/nginx
       pullPolicy: IfNotPresent
       # Overrides the image tag whose default is the chart appVersion.
       tag: "latest"
@@ -127,7 +127,7 @@ apps:
 
     # Expose deployment by service (types: ClusterIP, NodePort, LoadBalancer)
     # With ClusterIP (internal LoadBalancer) pods can communicate by svc name...
-    # ... example.smartcow.svc.cluster.local (where <svc metadata name>.<namespace>.svc.cluster.local)
+    # ... example.demoapp.svc.cluster.local (where <svc metadata name>.<namespace>.svc.cluster.local)
     service:
       type: ClusterIP
       port: 80
@@ -143,7 +143,7 @@ apps:
         nginx.ingress.kubernetes.io/use-regex: "true"
         nginx.ingress.kubernetes.io/rewrite-target: /$1
       hosts:
-      - host: example.odc-dbkb.concentrix.com
+      - host: example.odc-dbkb.ralf-it.com
         paths:
           - path: /
             backend:
@@ -154,7 +154,7 @@ apps:
       tls: 
       - secretName: tls-odc-dbkb
         hosts:
-          - example.odc-dbkb.concentrix.com
+          - example.odc-dbkb.ralf-it.com
 
     resources: {}
       # We usually recommend not to specify default resources and to leave this as a conscious
@@ -207,13 +207,13 @@ Deprecated ingress
         nginx.ingress.kubernetes.io/use-regex: "true"
         nginx.ingress.kubernetes.io/rewrite-target: /$1
       hosts:
-      - host: api-smartcow-dev.odc-dbkb.concentrix.com
+      - host: api-demoapp-dev.odc-dbkb.ralf-it.com
         paths:
           - path: /(api/.*)
             backend:
               serviceName: api-gateway
               servicePort: 8080
-      - host: api-smartcow-dev.odc-dbkb.concentrix.com
+      - host: api-demoapp-dev.odc-dbkb.ralf-it.com
         paths:
           - path: /(auth/.*)
             backend:
@@ -222,7 +222,7 @@ Deprecated ingress
       tls: 
       - secretName: tls-odc-dbkb
         hosts:
-          - api-smartcow-dev.odc-dbkb.concentrix.com
+          - api-demoapp-dev.odc-dbkb.ralf-it.com
 ```
 
 New Ingress
@@ -237,7 +237,7 @@ New Ingress
         nginx.ingress.kubernetes.io/use-regex: "true"
         nginx.ingress.kubernetes.io/rewrite-target: /$1
       hosts:
-      - host: api-smartcow-dev.odc-dbkb.concentrix.com
+      - host: api-demoapp-dev.odc-dbkb.ralf-it.com
         paths:
           - path: /(api/.*)
             backend:
@@ -245,7 +245,7 @@ New Ingress
                 name: api-gateway
                 port: 
                   number: 8080
-      - host: api-smartcow-dev.odc-dbkb.concentrix.com
+      - host: api-demoapp-dev.odc-dbkb.ralf-it.com
         paths:
           - path: /(auth/.*)
             backend:
@@ -256,5 +256,5 @@ New Ingress
       tls: 
       - secretName: tls-odc-dbkb
         hosts:
-          - api-smartcow-dev.odc-dbkb.concentrix.com
+          - api-demoapp-dev.odc-dbkb.ralf-it.com
 ```

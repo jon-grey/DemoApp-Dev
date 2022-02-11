@@ -13,14 +13,14 @@ metadata:
   name: {{ include "app.fullname" . }}
   namespace: {{ $.Release.Namespace }}
   labels:
-    {{- include "app.labels" . | nindent 4 }}
-    {{- with $v.extraLabels }}
-      {{ toYaml . | indent 4 }}
-    {{- end }}
-  {{- if $v.annotations }}
+{{- include "app.labels" . | nindent 4 }}
+{{- with $v.extraLabels }}
+{{ toYaml . | indent 4 }}
+{{- end }}
   annotations:
-  {{- toYaml $v.annotations | indent 4 }}
-  {{- end }}
+{{- with $v.annotations }}
+{{ toYaml . | indent 4 }}
+{{- end }}
 spec:
 {{- if and $v.replicaCount (not $v.autoscaling.enabled) }}
   replicas: {{ $v.replicaCount }}
@@ -55,7 +55,7 @@ spec:
           securityContext:
             {{- toYaml $v.securityContext | nindent 12 }}
           {{- end }}
-          {{ $defaultImageName := printf "%s:%s" $v.image.repository $v.image.tag -}}
+          {{ $defaultImageName := printf "%s:%s" $v.image.repository ( $v.image.tag | default $.Values.TAG ) -}}
           image: "{{ $v.image.name | default $defaultImageName }}"
           imagePullPolicy: {{ $v.image.pullPolicy }}
           ports:
@@ -76,6 +76,10 @@ spec:
           - secretRef:
               name: {{ include "app.fullname" . }}-secrets
           {{- end }}
+          {{- end }}
+          {{- if $v.env }}
+          env:
+            {{- toYaml $v.env | nindent 12 }}
           {{- end }}
           volumeMounts:
           {{- if $v.config }}

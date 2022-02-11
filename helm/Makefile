@@ -1,17 +1,17 @@
 
 
 helm-dry-run-install:
-	helm install helm-smartcow-test-install . --dry-run --debug --namespace smartcow
+	helm install helm-demoapp-test-install . --dry-run --debug --namespace demoapp
 
 helm-dry-run-upgrade:
 	helm version
 	helm upgrade --wait \
 				 --timeout 15m \
 				 --install \
-				 --namespace smartcow \
+				 --namespace demoapp \
 				 --create-namespace \
 				 --dry-run \
-				 helm-smartcow-test-upgrade .
+				 helm-demoapp-test-upgrade .
 
 make-dry-run:
 	make helm-dry-run-install
@@ -20,8 +20,8 @@ make-dry-run:
 helm-template:
 	helm version
 	mkdir -p .manifests
-	helm template --namespace smartcow \
+	helm template --namespace demoapp \
 				 --create-namespace \
 				 --debug \
-				 helm-smartcow . \
+				 helm-demoapp . \
 				 > .manifests/helm-templated.yaml

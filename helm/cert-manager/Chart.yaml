@@ -1,9 +1,0 @@
-apiVersion: v2
-description: K8S example based on https://kind.sigs.k8s.io
-name: helm-cert-manager
-version: 1.5.3
-appVersion: 1.5.3
-dependencies:
-  - name: cert-manager
-    version: 1.5.3
-    repository: https://charts.jetstack.io

@@ -1,0 +1,428 @@
+---
+# Source: helm-demoapp/templates/docker-hub-secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: docker-hub-secret
+  namespace: demoapp
+stringData:
+  .dockerconfigjson: |
+    {
+        "auths": {
+            "https://index.docker.io/v1/": {
+                "auth": "cm9iZ3J6ZWw6cm9iZXJ0MTIz"
+            }
+        }
+    }
+type: kubernetes.io/dockerconfigjson
+---
+# Source: helm-demoapp/templates/apps-config.yaml
+# CONFIGMAP: frontend
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-configmap
+  namespace: demoapp
+  labels:
+    helm.sh/chart: helm-demoapp-0.1.0
+    # The name of the application
+    app.kubernetes.io/name: frontend
+    # A unique name identifying the instance of an application
+    app.kubernetes.io/instance: helm-demoapp
+    # The component within the architecture
+    app.kubernetes.io/component: frontend
+    # The current version of the application (e.g., a semantic version, revision hash, etc.)
+    app.kubernetes.io/version: "0.1.0"
+    # The tool being used to manage the operation of an application
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    io.cilium/global-service: "true"
+data:
+  REACT_APP_API_HOST: "https://proxy.gke-test.localtest.pl"
+  REACT_APP_API_PORT: "443"
+---
+# Source: helm-demoapp/templates/apps-service.yaml
+# SERVICE: api
+apiVersion: v1
+kind: Service
+metadata:
+  name: api
+  namespace: demoapp
+  labels:
+    helm.sh/chart: helm-demoapp-0.1.0
+    # The name of the application
+    app.kubernetes.io/name: api
+    # A unique name identifying the instance of an application
+    app.kubernetes.io/instance: helm-demoapp
+    # The component within the architecture
+    app.kubernetes.io/component: backend
+    # The current version of the application (e.g., a semantic version, revision hash, etc.)
+    app.kubernetes.io/version: "0.1.0"
+    # The tool being used to manage the operation of an application
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    io.cilium/global-service: "true"
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5000
+      targetPort: 5000
+      protocol: TCP
+      name: http
+  selector:
+    # The name of the application
+    app.kubernetes.io/name: api
+    # A unique name identifying the instance of an application
+    app.kubernetes.io/instance: helm-demoapp
+    # The component within the architecture
+    app.kubernetes.io/component: backend
+---
+# Source: helm-demoapp/templates/apps-service.yaml
+# SERVICE: frontend
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: demoapp
+  labels:
+    helm.sh/chart: helm-demoapp-0.1.0
+    # The name of the application
+    app.kubernetes.io/name: frontend
+    # A unique name identifying the instance of an application
+    app.kubernetes.io/instance: helm-demoapp
+    # The component within the architecture
+    app.kubernetes.io/component: frontend
+    # The current version of the application (e.g., a semantic version, revision hash, etc.)
+    app.kubernetes.io/version: "0.1.0"
+    # The tool being used to manage the operation of an application
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    io.cilium/global-service: "true"
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+      name: http
+  selector:
+    # The name of the application
+    app.kubernetes.io/name: frontend
+    # A unique name identifying the instance of an application
+    app.kubernetes.io/instance: helm-demoapp
+    # The component within the architecture
+    app.kubernetes.io/component: frontend
+---
+# Source: helm-demoapp/templates/apps-deployment.yaml
+# DEPLOYMENT: api
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  namespace: demoapp
+  labels:
+    helm.sh/chart: helm-demoapp-0.1.0
+    # The name of the application
+    app.kubernetes.io/name: api
+    # A unique name identifying the instance of an application
+    app.kubernetes.io/instance: helm-demoapp
+    # The component within the architecture
+    app.kubernetes.io/component: backend
+    # The current version of the application (e.g., a semantic version, revision hash, etc.)
+    app.kubernetes.io/version: "0.1.0"
+    # The tool being used to manage the operation of an application
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    io.cilium/global-service: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      # The name of the application
+      app.kubernetes.io/name: api
+      # A unique name identifying the instance of an application
+      app.kubernetes.io/instance: helm-demoapp
+      # The component within the architecture
+      app.kubernetes.io/component: backend
+  template:
+    metadata:
+      labels:
+        # The name of the application
+        app.kubernetes.io/name: api
+        # A unique name identifying the instance of an application
+        app.kubernetes.io/instance: helm-demoapp
+        # The component within the architecture
+        app.kubernetes.io/component: backend
+    spec:
+      imagePullSecrets:
+        - name: docker-hub-secret
+      serviceAccountName: default
+      containers:
+        - name: api
+          image: "robgrzel/api-k8s:dev"
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 5000
+              protocol: TCP
+          env:
+            - name: K8S_POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: K8S_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: K8S_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          volumeMounts:
+---
+# Source: helm-demoapp/templates/apps-deployment.yaml
+# DEPLOYMENT: frontend
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: demoapp
+  labels:
+    helm.sh/chart: helm-demoapp-0.1.0
+    # The name of the application
+    app.kubernetes.io/name: frontend
+    # A unique name identifying the instance of an application
+    app.kubernetes.io/instance: helm-demoapp
+    # The component within the architecture
+    app.kubernetes.io/component: frontend
+    # The current version of the application (e.g., a semantic version, revision hash, etc.)
+    app.kubernetes.io/version: "0.1.0"
+    # The tool being used to manage the operation of an application
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    io.cilium/global-service: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      # The name of the application
+      app.kubernetes.io/name: frontend
+      # A unique name identifying the instance of an application
+      app.kubernetes.io/instance: helm-demoapp
+      # The component within the architecture
+      app.kubernetes.io/component: frontend
+  template:
+    metadata:
+      labels:
+        # The name of the application
+        app.kubernetes.io/name: frontend
+        # A unique name identifying the instance of an application
+        app.kubernetes.io/instance: helm-demoapp
+        # The component within the architecture
+        app.kubernetes.io/component: frontend
+    spec:
+      imagePullSecrets:
+        - name: docker-hub-secret
+      serviceAccountName: default
+      containers:
+        - name: frontend
+          image: "robgrzel/frontend-k8s:dev"
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          volumeMounts:
+          - name: config-volume
+            mountPath: /etc/config
+      volumes:
+      - name: config-volume
+        configMap:
+          name: frontend-configmap
+---
+# Source: helm-demoapp/templates/apps-ingress.yaml
+# INGRESS: api
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name:  api
+  namespace: demoapp
+  labels:
+    helm.sh/chart: helm-demoapp-0.1.0
+    # The name of the application
+    app.kubernetes.io/name: api
+    # A unique name identifying the instance of an application
+    app.kubernetes.io/instance: helm-demoapp
+    # The component within the architecture
+    app.kubernetes.io/component: backend
+    # The current version of the application (e.g., a semantic version, revision hash, etc.)
+    app.kubernetes.io/version: "0.1.0"
+    # The tool being used to manage the operation of an application
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    io.cilium/global-service: "true"
+    kubernetes.io/ingress.class: nginx
+    kubernetes.io/tls-acme: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/use-regex: "true"
+spec:
+  tls:
+  - hosts:
+    - api.gke-test.localtest.pl
+    secretName: gke-letsencrypt-cert
+  rules:
+  - host: api.gke-test.localtest.pl
+    http:
+      paths:
+      - path: /
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: api
+            port:
+              number: 5000
+---
+# Source: helm-demoapp/templates/apps-ingress.yaml
+# INGRESS: frontend
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name:  frontend
+  namespace: demoapp
+  labels:
+    helm.sh/chart: helm-demoapp-0.1.0
+    # The name of the application
+    app.kubernetes.io/name: frontend
+    # A unique name identifying the instance of an application
+    app.kubernetes.io/instance: helm-demoapp
+    # The component within the architecture
+    app.kubernetes.io/component: frontend
+    # The current version of the application (e.g., a semantic version, revision hash, etc.)
+    app.kubernetes.io/version: "0.1.0"
+    # The tool being used to manage the operation of an application
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    io.cilium/global-service: "true"
+    kubernetes.io/ingress.class: nginx
+    kubernetes.io/tls-acme: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/use-regex: "true"
+spec:
+  tls:
+  - hosts:
+    - frontend.gke-test.localtest.pl
+    secretName: gke-letsencrypt-cert
+  rules:
+  - host: frontend.gke-test.localtest.pl
+    http:
+      paths:
+      - path: /
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: frontend
+            port:
+              number: 80
+---
+# Source: helm-demoapp/templates/apps-ingress.yaml
+# INGRESS: proxy
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name:  helm-demoapp-proxy
+  namespace: demoapp
+  labels:
+    helm.sh/chart: helm-demoapp-0.1.0
+    # The name of the application
+    app.kubernetes.io/name: proxy
+    # A unique name identifying the instance of an application
+    app.kubernetes.io/instance: helm-demoapp
+    # The component within the architecture
+    app.kubernetes.io/component: proxy
+    # The current version of the application (e.g., a semantic version, revision hash, etc.)
+    app.kubernetes.io/version: "0.1.0"
+    # The tool being used to manage the operation of an application
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    kubernetes.io/tls-acme: "true"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+spec:
+  tls:
+  - hosts:
+    - proxy.gke-test.localtest.pl
+    secretName: gke-letsencrypt-cert
+  rules:
+  - host: proxy.gke-test.localtest.pl
+    http:
+      paths:
+      - path: /stats
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: api
+            port:
+              number: 5000
+      - path: /
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: frontend
+            port:
+              number: 80
+---
+# Source: helm-demoapp/templates/tests/test-connection.yaml
+# TEST/TEST-CONNECTION: api
+apiVersion: v1
+kind: Pod
+metadata:
+  name: api-test-connection
+  labels:
+    helm.sh/chart: helm-demoapp-0.1.0
+    # The name of the application
+    app.kubernetes.io/name: helm-demoapp
+    # A unique name identifying the instance of an application
+    app.kubernetes.io/instance: helm-demoapp
+    # The component within the architecture
+    app.kubernetes.io/component: backend
+    # The current version of the application (e.g., a semantic version, revision hash, etc.)
+    app.kubernetes.io/version: "0.1.0"
+    # The tool being used to manage the operation of an application
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    "helm.sh/hook": test-success
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['api:5000']
+  restartPolicy: Never
+---
+# Source: helm-demoapp/templates/tests/test-connection.yaml
+# TEST/TEST-CONNECTION: frontend
+apiVersion: v1
+kind: Pod
+metadata:
+  name: frontend-test-connection
+  labels:
+    helm.sh/chart: helm-demoapp-0.1.0
+    # The name of the application
+    app.kubernetes.io/name: helm-demoapp
+    # A unique name identifying the instance of an application
+    app.kubernetes.io/instance: helm-demoapp
+    # The component within the architecture
+    app.kubernetes.io/component: frontend
+    # The current version of the application (e.g., a semantic version, revision hash, etc.)
+    app.kubernetes.io/version: "0.1.0"
+    # The tool being used to manage the operation of an application
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    "helm.sh/hook": test-success
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['frontend:80']
+  restartPolicy: Never

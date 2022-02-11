@@ -16,9 +16,10 @@ metadata:
     {{- with $v.extraLabels }}
       {{ toYaml . | indent 4 }}
     {{- end }}
-{{- if $v.annotations }}
-  annotations: {{ toYaml $v.annotations | indent 4 }}
-{{- end }}
+  annotations: 
+    {{- with $v.annotations }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
 data:
 {{- range $v.config.data }}
   {{ .key }}: {{ .value | quote }}

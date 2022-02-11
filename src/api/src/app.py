@@ -1,3 +1,4 @@
+import os
 import psutil
 from flask import Flask, jsonify
 from flask_cors import CORS
@@ -9,8 +10,10 @@ CORS(app)
 def stats():
     cpu = psutil.cpu_percent()
     ram = psutil.virtual_memory().percent
-
-    return jsonify({"ram": ram, "cpu": cpu})
+    pod = os.environ.get("K8S_POD_NAME", None)
+    node = os.environ.get("K8S_NODE_NAME", None)
+    namespace = os.environ.get("K8S_POD_NAMESPACE", None)
+    return jsonify({"ram": ram, "cpu": cpu, "pod": pod, "namespace": namespace, "node": node })
 
 
 if __name__ == "__main__":

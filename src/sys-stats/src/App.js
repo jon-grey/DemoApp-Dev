@@ -9,8 +9,11 @@ class App extends Component {
   constructor(props) {
     super();
     this.state = {
+      node: "NODE",
+      namespace: "NAMESPACE",
+      pod: "POD",
       cpu: 0,
-      ram: 0
+      ram: 0,
     }
     this.loadData = this.loadData.bind(this)
   }
@@ -27,9 +30,12 @@ class App extends Component {
       const blocks = await res.json();
       const ram = blocks.ram;
       const cpu = blocks.cpu;
-      console.log(url,ram,cpu);
+      const pod = blocks.pod;
+      const node = blocks.node;
+      const namespace = blocks.namespace;
+      console.log(url,node,namespace,pod,ram,cpu);
       this.setState({
-        cpu, ram
+        node, namespace, pod, cpu, ram
       })
     } catch (e) {
       console.log(e);
@@ -43,8 +49,10 @@ class App extends Component {
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
           <div>
-            <h3>CPU : {this.state.cpu}</h3>
-            <h3>RAM : {this.state.ram}</h3>
+            <h2>NODE : {this.state.node} </h2>
+            <h3>POD : {this.state.namespace}/{this.state.pod}</h3>
+            <h4>CPU : {this.state.cpu}</h4>
+            <h4>RAM : {this.state.ram}</h4>
           </div>
         </header>
       </div>
